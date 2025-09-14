@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-import { Server } from '@modelcontextprotocol/sdk/server';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js;
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/index.js/stdio';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
   type CallToolRequest,
-} from '@modelcontextprotocol/sdk/types';
+} from '@modelcontextprotocol/sdk/types.js;
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import OpenAI from 'openai';
 
@@ -16,7 +16,7 @@ if (!GEMINI_API_KEY) {
   process.exit(1);
 }
 
-const ai = new GoogleGenerativeAI({ apiKey: GEMINI_API_KEY });
+const ai = new GoogleGenerativeAI(GEMINI_API_KEY );
 const OPENAI_KEY = process.env.OPENAI_API_KEY;
 const openai = OPENAI_KEY ? new OpenAI({ apiKey: OPENAI_KEY }) : null;
 

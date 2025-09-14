@@ -1,0 +1,12 @@
+version: 1
+name: alchemy-studio-mcp
+type: mcp
+language: node
+build:
+  command: npm ci && npm run build
+start:
+  command: node dist/standalone.js
+env:
+  - GEMINI_API_KEY
+  - OPENAI_API_KEY
+  - OPENAI_MODEL
