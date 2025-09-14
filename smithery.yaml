@@ -3,9 +3,10 @@ name: alchemy-studio-mcp
 type: mcp
 language: node
 build:
-  command: npm ci && npm run build
+  dockerfile: Dockerfile
 start:
   command: node dist/standalone.js
+transport: stdio
 env:
   - GEMINI_API_KEY
   - OPENAI_API_KEY
