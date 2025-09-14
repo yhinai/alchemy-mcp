@@ -13,7 +13,9 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"@google/generative-ai": "^0.24.1",
 		"@modelcontextprotocol/sdk": "^1.17.4",
+		"openai": "^5.20.2",
 		"zod": "^3.25.46"
 	},
 	"devDependencies": {
