@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-import { Server } from '@modelcontextprotocol/sdk/server/index.js;
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/index.js/stdio';
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
   type CallToolRequest,
-} from '@modelcontextprotocol/sdk/types.js;
+} from '@modelcontextprotocol/sdk/types.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import OpenAI from 'openai';
 
@@ -16,7 +16,7 @@ if (!GEMINI_API_KEY) {
   process.exit(1);
 }
 
-const ai = new GoogleGenerativeAI(GEMINI_API_KEY );
+const ai = new GoogleGenerativeAI(GEMINI_API_KEY as string);
 const OPENAI_KEY = process.env.OPENAI_API_KEY;
 const openai = OPENAI_KEY ? new OpenAI({ apiKey: OPENAI_KEY }) : null;
 
@@ -99,18 +99,21 @@ class StandaloneAlchemyMCP {
     if (!prompt) throw new Error('Missing prompt');
 
     if (model === 'imagen') {
-      // Imagen 4 text-to-image via @google/genai (generateImages)
-      // Note: exact model id may vary by access; using a common public preview id
-      const response: any = await (ai as any).models.generateImages({
-        model: 'imagen-4.0-fast-generate-001',
-        prompt,
-        config: { aspectRatio: aspect_ratio }
+      // Fallback to Gemini image-preview since direct Imagen via this SDK is not supported
+      const modelId = 'gemini-2.5-flash-image-preview';
+      const modelInstance: any = (ai as any).getGenerativeModel({ model: modelId });
+      const result = await modelInstance.generateContent({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }]
       });
 
-      const image = response?.generatedImages?.[0]?.image;
-      if (!image?.imageBytes) throw new Error('No image generated');
-      const dataUrl = `data:${image.mimeType || 'image/png'};base64,${image.imageBytes}`;
-      return { content: [{ type: 'text', text: `✅ Imagen 4 image\n\nPrompt: ${prompt}\n\n${dataUrl}` }] };
+      const parts = result?.response?.candidates?.[0]?.content?.parts || [];
+      let inlineData: any = null;
+      for (const p of parts) {
+        if (p?.inlineData?.data) { inlineData = p.inlineData; break; }
+      }
+      if (!inlineData?.data) throw new Error('No image generated');
+      const dataUrl = `data:${inlineData.mimeType || 'image/png'};base64,${inlineData.data}`;
+      return { content: [{ type: 'text', text: `✅ Image (Gemini fallback for Imagen)\n\nPrompt: ${prompt}\n\n${dataUrl}` }] };
     }
 
     // Gemini image generation (image preview model emits inline data)
